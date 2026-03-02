@@ -1,5 +1,18 @@
 # for speed, we encode the bond and atom types at UInt8's.
 
+"""
+    BondType(bond_order::Int)
+
+an efficient `UInt8` encoding of a bond type.
+
+# example
+```julia
+bt = BondType(0) # BOND_AROMATIC
+bt = BondType(1) # BOND_SINGLE
+bt = BondType(2) # BOND_DOUBLE
+bt = BondType(3) # BOND_TRIPLE
+```
+"""
 @enum BondType::UInt8 begin
     BOND_AROMATIC = 0
     BOND_SINGLE = 1
@@ -11,6 +24,16 @@ end
 # for element in elements
 #   println("ATOM_" * element.symbol * " = " * "$(element.number)")
 # end
+"""
+    AtomType(atomic_number::Int)
+
+an efficient `UInt8` encoding of an atom type. 
+
+# example
+```julia
+at = AtomType(6) # ATOM_C
+```
+"""
 @enum AtomType::UInt8 begin
     ATOM_H = 1
     ATOM_He = 2

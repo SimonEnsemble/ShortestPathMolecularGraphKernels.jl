@@ -7,6 +7,28 @@ struct MolGraph
     spaths::Vector{ShortestPath}
 end
 
+"""
+    MolGraph(
+        smiles::String; incl_hydrogen::Bool=false, verbose::Bool=false
+    ) -> MolGraph
+
+interpret a SMILES representation of a molecular structure as a molecular graph.
+
+relies on `MolecularGraph.jl`.
+
+# fields
+- `smiles::String`: the SMILES of the molecule represented
+- `incl_hydrogen::Bool`: include H atoms?
+- `g::SimpleGraph`: the graph (nodes: atoms; edges: bonds)
+- `atoms::Vector{AtomType}`: list of labels (atom types) on the nodes
+- `bonds::Vector{BondType}`: list of labels (bond types) on the edges
+- `spaths::Vector{ShortestPath}`: list of shortest paths
+
+# example
+```julia
+mg = MolGraph("CN1C=NC2=C1C(=O)N(C)C(=O)N2C") # caffeine
+```
+"""
 function MolGraph(smiles::String; incl_hydrogen::Bool=false, verbose::Bool=false)
     if verbose
         println("reading in ", smiles)

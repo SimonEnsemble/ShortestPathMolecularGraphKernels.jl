@@ -23,6 +23,23 @@ function shortest_path_kernel(
     return k
 end
 
+"""
+    shortest_path_graph_kernel(
+        mg₁::MolGraph, mg₂::MolGraph; exact_seq_matching::Bool=false
+    ) -> Float64
+
+compute the shortest path molecular graph kernel between two input
+molecular graphs.
+
+the kernel value is calculated by summing the similarity of all pairs of shortest
+paths between the two graphs. 
+
+if `exact_seq_matching::Bool`, we require exact matching of the atom-bond label
+sequence to note two common paths; otherwise, we note two common paths if the
+length and unordered pair of atom labels in the src and dst nodes are identical.
+
+returns a numerical value representing the similarity between the two graphs.
+"""
 function shortest_path_graph_kernel(
     mg₁::MolGraph, mg₂::MolGraph; exact_seq_matching::Bool=false
 )

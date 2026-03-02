@@ -1,6 +1,20 @@
+"""
+    viz(mg::MolGraph; id_spath::Union{Int, Nothing}=nothing, nlabels::Bool=true)
+
+visualize a molecular graph and, if the index of a shortest path is provided,
+highlight that shortest path.
+
+uses `GraphMakie.jl` under the hood and displays a plot in a `Pluto.jl` notebook.
+
+# example
+```julia
+mg = MolGraph("CN1C=NC2=C1C(=O)N(C)C(=O)N2C")
+viz(mg, id_spath=39) # displays plot in Pluto
+```
+"""
 function viz(
 	mg::MolGraph;
-	nlabels::Bool=false,
+	nlabels::Bool=true,
     node_size::Int=25,
     id_spath::Union{Int, Nothing}=nothing,
     edge_hl_color::Symbol=:green3

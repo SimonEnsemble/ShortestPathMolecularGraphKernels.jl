@@ -7,6 +7,22 @@ function get_edge_id(g::SimpleGraph, u::Int, v::Int)
     error("no such edge ($u, $v) in the graph!")
 end
 
+"""
+    find_shortest_paths!(mg::MolGraph; ℓ_max::Int=typemax(Int)) -> nothing
+
+search for all shortest paths between all pairs of nodes in a molecular graph `mg`,
+up to and including of length `ℓ_max`.
+(uses Dijkstra's algorithm.)
+attach the list of shortest paths and their atom-bond label sequences to the molecular graph.
+
+# example
+```julia
+caf = MolGraph("CN1C=NC2=C1C(=O)N(C)C(=O)N2C") # caffeine
+caf.spaths # empty array
+find_shortest_paths!(caf)
+caf.spaths # now contains the list of shortest paths
+```
+"""
 function find_shortest_paths!(mg::MolGraph; ℓ_max::Int=typemax(Int))
     if ! is_connected(mg.g)
         error("$(mg.smiles) not a connected graph =/")
@@ -90,6 +106,7 @@ function find_shortest_paths!(mg::MolGraph; ℓ_max::Int=typemax(Int))
 		end
 	end
 
-	# only if connected...
     @assert sum(sp.w for sp in mg.spaths) ≈ nv(mg.g) * (nv(mg.g) - 1) / 2 + nv(mg.g)
+
+    return nothing
 end
