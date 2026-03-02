@@ -34,7 +34,7 @@ end
 # ╔═╡ f9461018-9522-4fe6-a53f-665b3839b6e4
 md"# `ShortestPathMolecularGraphKernels.jl`: demo and tests
 
-### 🐧 constructing the representation of a molecule
+## 🐧 constructing the representation of a molecule
 
 1. interpret a SMILES string as a molecular graph (nodes: atoms; edges: labels; categorical node attribute: atom type; categorical edge attribute: bond type)
 2. search for all shortest paths between all pairs of nodes and store them---including the atom, bond label sequence along them
@@ -147,39 +147,50 @@ end
 
 # ╔═╡ d6adf42a-d8df-46dd-8357-0b72364a396f
 md"
-### shortest path featurization
+## 🐧 shortest path featurization
 
-🍕 construct the explicit feature vectors"
+for testing the kernel, construct the explicit feature vectors.
+"
 
 # ╔═╡ 12b6cb4d-6769-4bd0-9bd1-7dee1a3982e2
-test_mgs = MolGraph.(
-	# list of test SMILES here.
-	[
-		"C1=CN=CN1", 
-		"NC(N)CC", 
-		"NCCC", 
-		"CN1C=NC2=C1C(=O)N(C)C(=O)N2C", 
-		"O=C(O)c1ccccc1",
-		"CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",
-		"CN1C=NC2=C1C(=O)N(C)C(=O)N2C"
-	], 
-	false
-)
+begin
+	test_mgs = MolGraph.(
+		# list of test SMILES here.
+		[
+			"C1=CN=CN1", 
+			"NC(N)CC", 
+			"NCCC", 
+			"CN1C=NC2=C1C(=O)N(C)C(=O)N2C", 
+			"O=C(O)c1ccccc1",
+			"CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",
+			"CN1C=NC2=C1C(=O)N(C)C(=O)N2C"
+		]
+	)
+	
+	for mg in test_mgs
+		find_shortest_paths!(mg)
+	end
+end
+
+# ╔═╡ de3c0011-0559-4380-a5f3-7a58dd664ddc
+md"### ordinary shortest path features
+
+💡 each shortest path feature is defined by a length and an un-ordered pair of atom labels.
+
+construct a feature space based on active features among this list of molecules.
+"
 
 # ╔═╡ b04958c5-c81c-4150-b192-0a97f96afc5e
 fs = FeatureSpace{OrdinarySPF}(test_mgs)
 
+# ╔═╡ 1b95ca2e-14bb-4844-b66c-82f4534076c3
+md"e.g. here is the feature vector of one of the molecules."
+
 # ╔═╡ ad8a3f0f-4464-40e7-a3da-ab27e9501fff
 build_feature_vector(mg, fs)
 
-# ╔═╡ 8d7e1fc5-0026-4e41-8ea5-8a3dc5877431
-fs_seq = FeatureSpace{LabelSeqSPF}(test_mgs)
-
-# ╔═╡ ad760d7d-c354-43c7-b5c7-c879cf48109b
-build_feature_vector(mg, fs_seq)
-
 # ╔═╡ 1a75285e-281a-47b8-b239-a083fc9bb373
-md"tricky details to get sets to work."
+md"✅ test some tricky details to get equality to work."
 
 # ╔═╡ ae0d1430-d5f5-41fa-a92c-179359e81cd7
 begin
@@ -189,64 +200,103 @@ begin
 	@test hash(f1) == hash(f2)
 end
 
-# ╔═╡ f32fc3fb-c7cb-4154-af41-fc690d9ad28c
-md"# tests
-
-🍕 an example I sketched out in my notebook.
-"
+# ╔═╡ fee56513-d201-4cdc-bb49-d822a60645ce
+md"✅ case 1: test the ordinary shortest path features" 
 
 # ╔═╡ 04dc912c-c50f-4845-ba58-c9b845a88cdd
 begin
-	mg₁ = MolGraph("C1=CN=CN1", false)
+	# construct molecular graph & find it shortest paths
+	mg₁ = MolGraph("C1=CN=CN1")
+	find_shortest_paths!(mg₁)
+
+	# all shortest paths are unique and thus have weight one
+	@test all(sp.w == 1.0 for sp in mg₁.spaths)
+
+	# build ordinary shortest path feature vector
 	ϕ₁ = build_feature_vector(mg₁, fs)
+	
+	# there are 15 active shortest paths
 	@test sum(ϕ₁) == 15
+	# ℓ = 0: 5
+	@test length(filter(sp -> sp.ℓ == 0, mg₁.spaths)) == 5 # atoms
+	# ℓ = 1: 5
+	@test length(filter(sp -> sp.ℓ == 1, mg₁.spaths)) == 5 # bonds
+	# ℓ = 2: 4
+	@test length(filter(sp -> sp.ℓ == 2, mg₁.spaths)) == 5
+	# ℓ ≥ 3: NONE! cuz SHORTEST PATH is never 3 but 2.
+	@test length(filter(sp -> sp.ℓ > 2, mg₁.spaths)) == 0
+	
+	# the shortest path node 2 <--> node 4
 	local sps = get_shortest_paths(mg₁, 2, 4)
 	@test length(sps) == 1
 	@test sps[1].ρ == reverse([4, 3, 2])
 	@test sps[1].ℓ == 2
-	@test all(sp.w == 1.0 for sp in mg₁.spaths)
+	
 	viz(mg₁, nlabels=true)
 end
 
+# ╔═╡ f56d3c19-9b8d-4a6e-bc57-341701d45d91
+md"✅ case 2: test the ordinary shortest path features" 
+
 # ╔═╡ 3e9c0f7a-fe4d-4fcc-8e55-b65a4f309393
 begin
-	mg₂ = MolGraph("NC(N)CC", false)
+	mg₂ = MolGraph("NC(N)CC")
+	find_shortest_paths!(mg₂)
 	ϕ₂ = build_feature_vector(mg₂, fs)
-	@test sum(ϕ₂) == 15
+	@test length(filter(sp -> sp.ℓ == 0, mg₂.spaths)) == length(mg₂.atoms) == 5
+	@test length(filter(sp -> sp.ℓ == 1, mg₂.spaths)) == length(mg₂.bonds) == 4
+ 	@test length(filter(sp -> sp.ℓ == 2, mg₂.spaths)) == 4
+	@test length(filter(sp -> sp.ℓ == 3, mg₂.spaths)) == 2
+	@test sum(ϕ₂) == 5 + 4 + 4 + 2
+	
 	viz(mg₂, nlabels=true)
 end
+
+# ╔═╡ f998cb67-3470-4287-9496-7133bdd2e9e1
+md"✅ test molecular graph kernel, manually computed" 
+
+# ╔═╡ 3e630fb9-8fd1-4cce-a0a8-78d60b9abe6a
+PlutoUI.LocalResource("manual_spgk_test.png")
 
 # ╔═╡ 357d1312-f98d-4a3e-9672-f540eba61ebd
 @test shortest_path_graph_kernel(mg₁, mg₂) == 9 + 4 + 2 + 8 + 2 + 4 + 1
 
 # ╔═╡ 50202a67-095e-47b2-bb96-c42d0f05bad7
-@test shortest_path_graph_kernel(mg₁, mg₂, exact_seq_matching=true) == 9 + 4 # no edge matches, so...
+# zero edge matches, so just ℓ = 0 paths match
+@test shortest_path_graph_kernel(mg₁, mg₂, exact_seq_matching=true) == 9 + 4
+
+# ╔═╡ c83aec87-9f63-408c-839d-86f09d6b45dd
+md"✅ the graph kernel is the inner product between the feature vectors!" 
 
 # ╔═╡ 749cc889-8dfc-41c3-b04b-94e671e3d347
 @test dot(ϕ₁, ϕ₂) == shortest_path_graph_kernel(mg₁, mg₂)
 
 # ╔═╡ 7b65e9fd-ce90-49e6-9f55-5bfc289dfa23
 begin
-	mg₃ = MolGraph("NCCC", false)
-	# reasoning:
+	mg₃ = MolGraph("NCCC")
+	find_shortest_paths!(mg₃)
+	
 	# ℓ = 0: [CC, NN]. [3, 1] ⋅ [3, 2] = 11
 	# ℓ = 1: [CC, CN]. [2, 2] ⋅ [2, 1] = 4 + 2
 	# ℓ = 2: [CC, CN, NN]. [1, 2, 1] ⋅ [1, 1, 0] = 3
 	# ℓ = 3: [CN]. [1] ⋅ [2] = 2
 	@test shortest_path_graph_kernel(mg₂, mg₃) == 11 + 6 + 3 + 2
+	
 	# now, when label sequence matters, what are mis-matches? none!
 	@test shortest_path_graph_kernel(mg₂, mg₃) == shortest_path_graph_kernel(
 		mg₂, mg₃, exact_seq_matching=true)
+	
 	viz(mg₃, nlabels=true)
 end
 
 # ╔═╡ 9fe0ea1d-2aa4-42f9-80f0-278e2937cbca
-md"🍕 caffeine and ibuprofen---compare with featurization."
+md"✅ a more complex example: caffeine and ibuprofen."
 
 # ╔═╡ 020f859d-0f5a-4b82-bcc5-88dedc1776d2
 begin
-	caf = MolGraph("CN1C=NC2=C1C(=O)N(C)C(=O)N2C", false)
-	ibu = MolGraph("CC(C)CC1=CC=C(C=C1)C(C)C(=O)O", false)
+	caf = MolGraph("CN1C=NC2=C1C(=O)N(C)C(=O)N2C")
+	ibu = MolGraph("CC(C)CC1=CC=C(C=C1)C(C)C(=O)O")
+	find_shortest_paths!.([caf, ibu])
 	
 	ϕ_caf = build_feature_vector(caf, fs)
 	ϕ_ibu = build_feature_vector(ibu, fs)
@@ -254,11 +304,8 @@ begin
 	@test dot(ϕ_ibu, ϕ_caf) == shortest_path_graph_kernel(caf, ibu)
 end
 
-# ╔═╡ 64d79622-dff2-4e77-85d2-4aa782144924
-active_features([ibu], OrdinarySPF)
-
 # ╔═╡ 4c01eaf7-d479-4648-be16-27e7eef7a309
-md"🍕 for ibuprofen, test some of the shortest paths."
+md"✅ for ibuprofen, test some of the shortest paths and shortest path features."
 
 # ╔═╡ 0a0b68fe-c0bb-433f-8cb8-e53465664bd0
 begin
@@ -281,21 +328,20 @@ begin
 	
 	@test get_shortest_paths(ibu, 12, 9)[1].ρ == [12, 11, 8, 9]
 	@test get_shortest_paths(ibu, 5, 3)[1].ρ == reverse([5, 4, 2, 3])
+
+	viz(ibu, nlabels=true)
 end
 
-# ╔═╡ 3c0113a0-6453-4d5b-9d68-614e975d0ece
-viz(ibu, nlabels=true)
-
-# ╔═╡ 5d180fdf-e1c0-44f0-8edd-573c9afb7475
-viz(caf, nlabels=true)
-
-# ╔═╡ cf8998e1-f39a-45e2-b7e5-1f831cb3a586
-md"🍕 couple more..."
+# ╔═╡ 6c0bbcce-0d91-4bd8-83e8-6e663eaf10a9
+md"✅ test shortest path features for another molecule."
 
 # ╔═╡ 3abe5e9e-777e-44fd-bd3e-8611beacc6f4
 begin
-	ba = MolGraph("O=C(O)c1ccccc1", false)
+	ba = MolGraph("O=C(O)c1ccccc1")
+	find_shortest_paths!(ba)
+	
 	ϕ_ba = build_feature_vector(ba, fs)
+	
 	# test specific SPFs
 	@test ϕ_ba[
 		fs.feature_to_id[OrdinarySPF(ATOM_O, ATOM_O, 2)]
@@ -306,55 +352,47 @@ begin
 	@test ϕ_ba[
 		fs.feature_to_id[OrdinarySPF(ATOM_C, ATOM_C, 0)]
 	] == 7
-	@test length(get_shortest_paths(ba, 2, 7)) == 2
-	viz(ba, nlabels=true)
-end
 
-# ╔═╡ a85711a1-8dbd-4bf8-9046-1cdf74a88cd5
-begin
-	# just one {O, O} ℓ = 2 feature
-	@test ϕ_ba[
-		fs.feature_to_id[OrdinarySPF(ATOM_O, ATOM_O, 2)]
-	] == 1
-	
 	@test get_shortest_paths(ba, 1, 3)[1].ℓ == 2
 	@test get_shortest_paths(ba, 2, 8)[1].ℓ == 3
+	
+	@test length(get_shortest_paths(ba, 2, 7)) == 2
 
 	@test dot(ϕ_ba, ϕ_ibu) == shortest_path_graph_kernel(ba, ibu)
-	# symmetry
-	@test shortest_path_graph_kernel(ba, ibu) == shortest_path_graph_kernel(ibu, ba)
 	@test dot(ϕ_ba, ϕ_ba) == shortest_path_graph_kernel(ba, ba)
 
 	@test get_shortest_paths(ba, 1, 3)[1].ρ == [1, 2, 3]
 	@test get_shortest_paths(ba, 7, 5)[1].ρ == reverse([7, 6, 5])
 	@test get_shortest_paths(ba, 8, 1)[1].ρ == reverse([8, 9, 4, 2, 1])
+
+	# symmetry
+	@test shortest_path_graph_kernel(ba, ibu) == shortest_path_graph_kernel(ibu, ba)
+
+	@test shortest_path_graph_kernel(ba, ibu, exact_seq_matching=true) < shortest_path_graph_kernel(ba, ibu, exact_seq_matching=false)
+	
+	viz(ba, nlabels=true)
 end
 
-# ╔═╡ 88946927-f014-4bec-a6a5-17ed9db02b19
-viz(ibu, nlabels=true)
-
-# ╔═╡ 57215f37-7b88-4edf-9411-91cd696238fd
-shortest_path_graph_kernel(ba, ba)
-
-# ╔═╡ 214f70c0-1a5d-4f6c-a907-8e86025fe19c
-@btime shortest_path_graph_kernel(ba, ibu)
-
-# ╔═╡ 2bfb6517-de01-4c4e-bf40-346e18f129c5
-shortest_path_graph_kernel(ba, ba)
-
-# ╔═╡ efdeeed8-9583-4433-b9e0-89aa1ef888d8
-@test shortest_path_graph_kernel(ba, ibu, exact_seq_matching=true) < shortest_path_graph_kernel(ba, ibu, exact_seq_matching=false)
-
 # ╔═╡ e08d4d33-30fa-4fea-807e-7c8ab244debc
-md"## exact pattern matching
+md"## 🐧 exact matching on the atom-bond label sequence
 
-first, get a list of the unique features.
+💡 each feature now is defined by an atom-bond label sequence.
 "
+
+# ╔═╡ 8d7e1fc5-0026-4e41-8ea5-8a3dc5877431
+fs_seq = FeatureSpace{LabelSeqSPF}(test_mgs)
+
+# ╔═╡ 52da25a4-dd70-4531-aafd-d69ebcef95a7
+md"e.g. here is the feature vector of one of the molecules."
+
+# ╔═╡ ad760d7d-c354-43c7-b5c7-c879cf48109b
+build_feature_vector(mg, fs_seq)
 
 # ╔═╡ 7d5b9446-9adc-489c-961c-a6b6ea3240ee
 begin
 	ϕ_seq_ba = build_feature_vector(ba, fs_seq)
 	ϕ_seq_ibu = build_feature_vector(ibu, fs_seq)
+	
 	# just one {O, O} ℓ = 2 feature
 	@test ϕ_seq_ba[
 		fs_seq.feature_to_id[
@@ -382,8 +420,9 @@ end
 # ╔═╡ cbd9304a-d88e-42a6-8cc9-ad5ef6198f36
 begin
 	# ethanol vs carbon monoxide
-	mg_et = MolGraph("CCO", false) # [C, SINGLE, C, SINGLE, O]
-	mg_co = MolGraph("C#O", false)
+	mg_et = MolGraph("CCO") # [C, SINGLE, C, SINGLE, O]
+	mg_co = MolGraph("C#O")
+	find_shortest_paths!.([mg_et, mg_co])
 	@test shortest_path_graph_kernel(
 		mg_et, mg_co, exact_seq_matching=false
 	) == 4.0 # 2 x C, 1 x O, 1 x CO
@@ -392,6 +431,15 @@ begin
 		mg_et, mg_co, exact_seq_matching=true
 	) == 3.0 # 2 x C, 1 x O, 0 x CO cuz triple vs single blod
 end
+
+# ╔═╡ 27f09dc8-fe7b-4994-b0e5-29de901d5e8c
+md"## 🕐 timing"
+
+# ╔═╡ 214f70c0-1a5d-4f6c-a907-8e86025fe19c
+@btime shortest_path_graph_kernel(ba, ibu)
+
+# ╔═╡ 2bfb6517-de01-4c4e-bf40-346e18f129c5
+@btime shortest_path_graph_kernel(ba, ibu, exact_seq_matching=true)
 
 # ╔═╡ Cell order:
 # ╠═cecf3058-bb8f-11f0-97f3-bda46249b7c9
@@ -412,35 +460,36 @@ end
 # ╠═8c09e491-c03f-40b7-ab2c-faec377ef630
 # ╟─d6adf42a-d8df-46dd-8357-0b72364a396f
 # ╠═12b6cb4d-6769-4bd0-9bd1-7dee1a3982e2
+# ╟─de3c0011-0559-4380-a5f3-7a58dd664ddc
 # ╠═b04958c5-c81c-4150-b192-0a97f96afc5e
+# ╟─1b95ca2e-14bb-4844-b66c-82f4534076c3
 # ╠═ad8a3f0f-4464-40e7-a3da-ab27e9501fff
-# ╠═64d79622-dff2-4e77-85d2-4aa782144924
-# ╠═8d7e1fc5-0026-4e41-8ea5-8a3dc5877431
-# ╠═ad760d7d-c354-43c7-b5c7-c879cf48109b
 # ╟─1a75285e-281a-47b8-b239-a083fc9bb373
 # ╠═ae0d1430-d5f5-41fa-a92c-179359e81cd7
-# ╟─f32fc3fb-c7cb-4154-af41-fc690d9ad28c
+# ╟─fee56513-d201-4cdc-bb49-d822a60645ce
 # ╠═04dc912c-c50f-4845-ba58-c9b845a88cdd
+# ╟─f56d3c19-9b8d-4a6e-bc57-341701d45d91
 # ╠═3e9c0f7a-fe4d-4fcc-8e55-b65a4f309393
+# ╟─f998cb67-3470-4287-9496-7133bdd2e9e1
+# ╟─3e630fb9-8fd1-4cce-a0a8-78d60b9abe6a
 # ╠═357d1312-f98d-4a3e-9672-f540eba61ebd
 # ╠═50202a67-095e-47b2-bb96-c42d0f05bad7
+# ╟─c83aec87-9f63-408c-839d-86f09d6b45dd
 # ╠═749cc889-8dfc-41c3-b04b-94e671e3d347
 # ╠═7b65e9fd-ce90-49e6-9f55-5bfc289dfa23
 # ╟─9fe0ea1d-2aa4-42f9-80f0-278e2937cbca
 # ╠═020f859d-0f5a-4b82-bcc5-88dedc1776d2
 # ╟─4c01eaf7-d479-4648-be16-27e7eef7a309
 # ╠═0a0b68fe-c0bb-433f-8cb8-e53465664bd0
-# ╠═3c0113a0-6453-4d5b-9d68-614e975d0ece
-# ╠═5d180fdf-e1c0-44f0-8edd-573c9afb7475
-# ╟─cf8998e1-f39a-45e2-b7e5-1f831cb3a586
+# ╟─6c0bbcce-0d91-4bd8-83e8-6e663eaf10a9
 # ╠═3abe5e9e-777e-44fd-bd3e-8611beacc6f4
-# ╠═a85711a1-8dbd-4bf8-9046-1cdf74a88cd5
-# ╠═88946927-f014-4bec-a6a5-17ed9db02b19
-# ╠═57215f37-7b88-4edf-9411-91cd696238fd
-# ╠═214f70c0-1a5d-4f6c-a907-8e86025fe19c
-# ╠═2bfb6517-de01-4c4e-bf40-346e18f129c5
-# ╠═efdeeed8-9583-4433-b9e0-89aa1ef888d8
 # ╟─e08d4d33-30fa-4fea-807e-7c8ab244debc
+# ╠═8d7e1fc5-0026-4e41-8ea5-8a3dc5877431
+# ╟─52da25a4-dd70-4531-aafd-d69ebcef95a7
+# ╠═ad760d7d-c354-43c7-b5c7-c879cf48109b
 # ╠═7d5b9446-9adc-489c-961c-a6b6ea3240ee
 # ╠═303a7141-a442-4162-b67c-f7d12c3f4ca1
 # ╠═cbd9304a-d88e-42a6-8cc9-ad5ef6198f36
+# ╟─27f09dc8-fe7b-4994-b0e5-29de901d5e8c
+# ╠═214f70c0-1a5d-4f6c-a907-8e86025fe19c
+# ╠═2bfb6517-de01-4c4e-bf40-346e18f129c5
