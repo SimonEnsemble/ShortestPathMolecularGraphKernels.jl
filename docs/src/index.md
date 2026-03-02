@@ -42,7 +42,7 @@ mg.spaths[id_spath]          # shows all info abt this shortest path
 viz(mg, id_spath=id_spath)   # visualize
 ```
 
-<img src="caffeine_w_path_hl.png" width="300" alt="Logo">
+![My Image Description](caffeine_w_path_hl.png)
 
 finally, what this is all about: computing the shortest path graph kernel between a pair of molecular graphs.
 ```julia
