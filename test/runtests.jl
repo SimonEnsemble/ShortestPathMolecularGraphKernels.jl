@@ -441,7 +441,12 @@ md"## 🐧 multi-threaded Gram matrix computation"
 Threads.nthreads() # number of threads
 
 # ╔═╡ 70359912-dc86-4c73-ac53-85001f27b65a
-@btime compute_Gram_matrix(test_mgs, false)
+K = @btime compute_Gram_matrix(test_mgs, false)
+
+# ╔═╡ f4c2a738-d82f-445c-890f-cec99fbd3573
+@test K[3, 4] ≈ shortest_path_graph_kernel(
+	test_mgs[3], test_mgs[4]
+)
 
 # ╔═╡ 27f09dc8-fe7b-4994-b0e5-29de901d5e8c
 md"## 🕐 timing"
@@ -504,6 +509,7 @@ md"## 🕐 timing"
 # ╟─54921516-63b0-472a-b1d3-005a73762a90
 # ╠═d2eb0777-0b84-4281-8363-2dbde45cbe0b
 # ╠═70359912-dc86-4c73-ac53-85001f27b65a
+# ╠═f4c2a738-d82f-445c-890f-cec99fbd3573
 # ╟─27f09dc8-fe7b-4994-b0e5-29de901d5e8c
 # ╠═214f70c0-1a5d-4f6c-a907-8e86025fe19c
 # ╠═2bfb6517-de01-4c4e-bf40-346e18f129c5
