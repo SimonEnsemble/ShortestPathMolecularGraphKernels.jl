@@ -29,16 +29,20 @@ for instance in instances(AtomType)
     @eval export $(Symbol(instance))
 end
 
-include("shortest_paths.jl")
+include("shortest_path.jl")
 include("molecular_graph.jl")
+include("viz.jl")
+include("find_shortest_paths.jl")
 include("shortest_path_graph_kernel.jl")
 include("featurization.jl")
 include("gram_matrix.jl")
 
-export find_all_shortest_paths, ShortestPath, get_shortest_paths, # shortest_paths.jl
-       MolGraph, viz,  # molecular_graph.jl
-       OrdinarySPF, LabelSeqSPF, build_feature_vector, FeatureSpace, # featurization.jl
-       active_features,
-       shortest_path_graph_kernel, shortest_path_kernel, indistinguishable_pairs, # shorest_path_kernel.jl
-       compute_Gram_matrix # gram_matrix.jl
+export ShortestPath, get_shortest_paths,                          # shortest_path.jl 
+    MolGraph,                                                     # molecular_graph.jl
+    viz,                                                          # viz.jl
+    find_shortest_paths!,                                         # find_shortest_paths.jl
+    OrdinarySPF, LabelSeqSPF, build_feature_vector, FeatureSpace, # featurization.jl
+    active_features,
+    shortest_path_graph_kernel, shortest_path_kernel, indistinguishable_pairs, # shorest_path_kernel.jl
+    compute_Gram_matrix # gram_matrix.jl
 end

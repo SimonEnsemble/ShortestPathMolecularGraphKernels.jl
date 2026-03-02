@@ -27,86 +27,121 @@ begin
 	using ShortestPathMolecularGraphKernels
 	using PlutoUI # sorry no way around for runtests.jl as script
 	using Graphs, Printf, LinearAlgebra, GraphMakie, BenchmarkTools, Colors, Test
+
+	TableOfContents()
 end
 
 # ╔═╡ f9461018-9522-4fe6-a53f-665b3839b6e4
-md"# 👀 demo and test along the way
+md"# `ShortestPathMolecularGraphKernels.jl`: demo and tests
 
+### 🐧 constructing the representation of a molecule
 
-### building a molecular graph and listing its shortest paths
-
-🍕 construct a molecular graph from the SMILES string, then visualize it.
+1. interpret a SMILES string as a molecular graph (nodes: atoms; edges: labels; categorical node attribute: atom type; categorical edge attribute: bond type)
+2. search for all shortest paths between all pairs of nodes and store them---including the atom, bond label sequence along them
+3. visualize the molecular graph and explore the shortest paths
 "
 
 # ╔═╡ 50d85bc2-2e1a-424a-84f7-5a22c88759ed
-mg = MolGraph(
-	"CN1C=NC2=C1C(=O)N(C)C(=O)N2C", # SMILES
-	false,                          # include H atoms?
-	ℓ_max=typemax(Int)              # max shortest path length to consider
-)
+begin
+	# interpret the SMILES string as a molecular graph
+	mg = MolGraph(
+		"CN1C=NC2=C1C(=O)N(C)C(=O)N2C", # SMILES
+		incl_hydrogen=false             # "include H atoms?
+	)
+	
+	# search for and store all shortest paths---
+	#   including the atom and bond label sequence
+	find_shortest_paths!(
+		mg,                 # the molecular graph
+		ℓ_max=typemax(Int)  # the max path length
+	)
+
+	# show the attributes of the data structure
+	mg
+end
 
 # ╔═╡ f774c2df-1859-443e-9fee-9d490a18c83b
 md"id of shortest path $(@bind id_spath PlutoUI.Slider(1:length(mg.spaths)))"
 
+# ╔═╡ ffa9d1c9-9534-46fd-aed2-ed549ac46384
+mg.spaths[id_spath] # wut path are we lookin' at?
+
 # ╔═╡ 1f17de1a-5375-4c22-97cd-7dc04645b9d1
 viz(mg, nlabels=true, id_spath=id_spath, edge_hl_color=:green3)
 
-# ╔═╡ ffa9d1c9-9534-46fd-aed2-ed549ac46384
-mg.spaths[id_spath]
-
 # ╔═╡ 7e5c01f5-a1fa-4bca-a7eb-c079a7237a8f
-md"🍕 lookit the shortest paths."
+md"to facilitate testing, this maps an atom and bond sequence along a path to the `UInt8` sequence stored to represent the path."
 
 # ╔═╡ a25f2e89-66d6-4e83-8275-0541847af896
-function intermingle(atom_seq::Array{AtomType}, bond_seq::Array{BondType})
-	ℓ = length(bond_seq)
-	@assert length(atom_seq) == ℓ + 1
-	seq = Vector{UInt8}(undef, 2 * ℓ + 1)
-	for i = 1:ℓ+1
-		seq[2 * i - 1] = UInt8(atom_seq[i])
-		if i ≤ ℓ
-			seq[2 * i] = UInt8(bond_seq[i])
-		end
-	end
-	reverse_seq = reverse(seq)
-	if isless(seq, reverse_seq)
-		return reverse_seq
-	else
-		return seq
-	end
+function merge(atoms::Array{AtomType}, bonds::Array{BondType})
+	@assert length(atoms) == length(bonds) + 1 # for validity
+	
+	ℓ = length(bonds)
+	seq = UInt8.(
+		[
+			i % 2 == 1 ? atoms[i÷2 + 1] : bonds[i÷2]
+			for i in 1:(2*ℓ + 1)
+		]
+	)
+
+	return max(seq, reverse(seq))
 end
+
+# ╔═╡ 7d96254c-eac5-4171-88b4-4f29d7097fc3
+md"✅ look at the shortest path between node 8 and node 2."
 
 # ╔═╡ 22711aee-059a-48f4-9f4f-43a89e5809e4
 begin
-	# 2 -> 8
 	local spaths = get_shortest_paths(mg, 2, 8)
 	local spath = spaths[1]
-	@test length(spaths) == 1 # unique spath
+	
+	# it's a unique spath
+	@test length(spaths) == 1
+	@test spath.w ≈ 1.0
+	
+	# its length is three.
 	@test spath.ℓ == 3
-	@test spath.seq == intermingle(
+
+	# its atom-bond label sequence
+	@test spath.seq == merge(
 		[ATOM_N, ATOM_C, ATOM_C, ATOM_O],
 		[BOND_AROMATIC, BOND_AROMATIC, BOND_DOUBLE]
 	)
-	@test spath.w ≈ 1.0
-	@test spath.ρ[1] == 8 && spath.ρ[end] == 2
-	@test spath.seq[1] == UInt8(mg.atoms[spath.ρ[1]])
-	@test spath.seq[3] == UInt8(mg.atoms[spath.ρ[2]])
-	@test spath.seq[end] == UInt8(mg.atoms[spath.ρ[end]])
-	
-	# edge case of ℓ = 0
-	@test get_shortest_paths(mg, 8, 8)[1].seq == UInt8.([ATOM_O])
 
-	# edge of case of more than one shortest path
+	# check
+	@test spath.ρ[1] == 8 && spath.ρ[end] == 2
+	
+	# 1st, 2nd, last atom have correct label in the sequence
+	@test spath.seq[1] == UInt8(ATOM_O)
+	@test spath.seq[3] == UInt8(ATOM_C)
+	@test spath.seq[end] == UInt8(ATOM_N)
+end
+
+# ╔═╡ e376b1ec-9140-421d-8b9b-d9df1d026c4e
+md"✅ look at an edge case of ℓ = 0."
+
+# ╔═╡ ef3a311e-7d43-4f48-9c12-1bff16006189
+@test get_shortest_paths(mg, 8, 8)[1].seq == UInt8.([ATOM_O])
+
+# ╔═╡ ba616dad-8ac4-4709-8730-cc3127bd5833
+md"✅ look at an edge case where there is more than one shorest path."
+
+# ╔═╡ a0c5a12d-6beb-47ec-96f8-ccc091dab7c6
+begin
 	@test length(get_shortest_paths(mg, 12, 6)) == 2
 	@test get_shortest_paths(mg, 12, 6)[1].w ≈ 1/2
+end
 
-	# 13 -> 12
+# ╔═╡ 816c5c89-6fb9-4f75-b8bc-60edda482f33
+md"✅ look at shorest path between node 12 and node 13."
+
+# ╔═╡ 8c09e491-c03f-40b7-ab2c-faec377ef630
+begin
 	local spath = get_shortest_paths(mg, 13, 12)[1]
-	@test spath.seq == intermingle(
+	@test spath.seq == merge(
 		[ATOM_N, ATOM_C, ATOM_O],
 		[BOND_AROMATIC, BOND_DOUBLE]
 	)
-	#@test 
 	@test AtomType(spath.seq[1]) == mg.atoms[spath.ρ[1]]
 end
 
@@ -324,7 +359,7 @@ begin
 	@test ϕ_seq_ba[
 		fs_seq.feature_to_id[
 			LabelSeqSPF(
-				intermingle(
+				merge(
 					[ATOM_O, ATOM_C, ATOM_O],
 					[BOND_DOUBLE, BOND_SINGLE]
 				)
@@ -363,11 +398,18 @@ end
 # ╟─f9461018-9522-4fe6-a53f-665b3839b6e4
 # ╠═50d85bc2-2e1a-424a-84f7-5a22c88759ed
 # ╟─f774c2df-1859-443e-9fee-9d490a18c83b
-# ╠═1f17de1a-5375-4c22-97cd-7dc04645b9d1
 # ╠═ffa9d1c9-9534-46fd-aed2-ed549ac46384
+# ╠═1f17de1a-5375-4c22-97cd-7dc04645b9d1
 # ╟─7e5c01f5-a1fa-4bca-a7eb-c079a7237a8f
 # ╠═a25f2e89-66d6-4e83-8275-0541847af896
+# ╟─7d96254c-eac5-4171-88b4-4f29d7097fc3
 # ╠═22711aee-059a-48f4-9f4f-43a89e5809e4
+# ╟─e376b1ec-9140-421d-8b9b-d9df1d026c4e
+# ╠═ef3a311e-7d43-4f48-9c12-1bff16006189
+# ╟─ba616dad-8ac4-4709-8730-cc3127bd5833
+# ╠═a0c5a12d-6beb-47ec-96f8-ccc091dab7c6
+# ╟─816c5c89-6fb9-4f75-b8bc-60edda482f33
+# ╠═8c09e491-c03f-40b7-ab2c-faec377ef630
 # ╟─d6adf42a-d8df-46dd-8357-0b72364a396f
 # ╠═12b6cb4d-6769-4bd0-9bd1-7dee1a3982e2
 # ╠═b04958c5-c81c-4150-b192-0a97f96afc5e
