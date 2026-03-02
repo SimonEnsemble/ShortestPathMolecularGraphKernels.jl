@@ -4,6 +4,7 @@ __precompile__(false)
 module ShortestPathMolecularGraphKernels
 
 import Base: ==, hash
+using Base.Threads
 
 using Graphs, CairoMakie, GraphMakie, Printf, Colors
 using PeriodicTable: elements

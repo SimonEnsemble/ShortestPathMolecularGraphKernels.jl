@@ -37,8 +37,8 @@ md"# `ShortestPathMolecularGraphKernels.jl`: demo and tests
 ## 🐧 constructing the representation of a molecule
 
 1. interpret a SMILES string as a molecular graph (nodes: atoms; edges: labels; categorical node attribute: atom type; categorical edge attribute: bond type)
-2. search for all shortest paths between all pairs of nodes and store them---including the atom, bond label sequence along them
-3. visualize the molecular graph and explore the shortest paths
+2. search for all shortest paths between all pairs of nodes and store them---including the atom-bond label sequence along them
+3. visualize the molecular graph and explore its shortest paths
 "
 
 # ╔═╡ 50d85bc2-2e1a-424a-84f7-5a22c88759ed
@@ -70,7 +70,7 @@ mg.spaths[id_spath] # wut path are we lookin' at?
 viz(mg, nlabels=true, id_spath=id_spath, edge_hl_color=:green3)
 
 # ╔═╡ 7e5c01f5-a1fa-4bca-a7eb-c079a7237a8f
-md"to facilitate testing, this maps an atom and bond sequence along a path to the `UInt8` sequence stored to represent the path."
+md"to facilitate writing tests, this function maps an atom and bond sequence along a path to the `UInt8` sequence stored to represent the path."
 
 # ╔═╡ a25f2e89-66d6-4e83-8275-0541847af896
 function merge(atoms::Array{AtomType}, bonds::Array{BondType})
@@ -147,9 +147,11 @@ end
 
 # ╔═╡ d6adf42a-d8df-46dd-8357-0b72364a396f
 md"
-## 🐧 shortest path featurization
+## 🐧 explicit shortest path featurization
 
 for testing the kernel, construct the explicit feature vectors.
+
+💡 the kernel between two molecular graphs should be equal to the dot product of their two explicitly constructed shortest path feature vectors.
 "
 
 # ╔═╡ 12b6cb4d-6769-4bd0-9bd1-7dee1a3982e2
@@ -374,7 +376,7 @@ begin
 end
 
 # ╔═╡ e08d4d33-30fa-4fea-807e-7c8ab244debc
-md"## 🐧 exact matching on the atom-bond label sequence
+md"### exact matching on the atom-bond label sequence
 
 💡 each feature now is defined by an atom-bond label sequence.
 "
@@ -431,6 +433,15 @@ begin
 		mg_et, mg_co, exact_seq_matching=true
 	) == 3.0 # 2 x C, 1 x O, 0 x CO cuz triple vs single blod
 end
+
+# ╔═╡ 54921516-63b0-472a-b1d3-005a73762a90
+md"## 🐧 multi-threaded Gram matrix computation"
+
+# ╔═╡ d2eb0777-0b84-4281-8363-2dbde45cbe0b
+Threads.nthreads() # number of threads
+
+# ╔═╡ 70359912-dc86-4c73-ac53-85001f27b65a
+@btime compute_Gram_matrix(test_mgs, false)
 
 # ╔═╡ 27f09dc8-fe7b-4994-b0e5-29de901d5e8c
 md"## 🕐 timing"
@@ -490,6 +501,9 @@ md"## 🕐 timing"
 # ╠═7d5b9446-9adc-489c-961c-a6b6ea3240ee
 # ╠═303a7141-a442-4162-b67c-f7d12c3f4ca1
 # ╠═cbd9304a-d88e-42a6-8cc9-ad5ef6198f36
+# ╟─54921516-63b0-472a-b1d3-005a73762a90
+# ╠═d2eb0777-0b84-4281-8363-2dbde45cbe0b
+# ╠═70359912-dc86-4c73-ac53-85001f27b65a
 # ╟─27f09dc8-fe7b-4994-b0e5-29de901d5e8c
 # ╠═214f70c0-1a5d-4f6c-a907-8e86025fe19c
 # ╠═2bfb6517-de01-4c4e-bf40-346e18f129c5
