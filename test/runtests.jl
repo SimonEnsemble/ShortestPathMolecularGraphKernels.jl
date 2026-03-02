@@ -63,11 +63,14 @@ end
 # ╔═╡ f774c2df-1859-443e-9fee-9d490a18c83b
 md"id of shortest path $(@bind id_spath PlutoUI.Slider(1:length(mg.spaths)))"
 
+# ╔═╡ e978a83d-f0b3-4dd0-98e6-250124698ec4
+id_spath
+
 # ╔═╡ ffa9d1c9-9534-46fd-aed2-ed549ac46384
 mg.spaths[id_spath] # wut path are we lookin' at?
 
 # ╔═╡ 1f17de1a-5375-4c22-97cd-7dc04645b9d1
-viz(mg, nlabels=true, id_spath=id_spath, edge_hl_color=:green3)
+viz(mg, id_spath=id_spath)
 
 # ╔═╡ 7e5c01f5-a1fa-4bca-a7eb-c079a7237a8f
 md"to facilitate writing tests, this function maps an atom and bond sequence along a path to the `UInt8` sequence stored to represent the path."
@@ -375,6 +378,9 @@ begin
 	viz(ba, nlabels=true)
 end
 
+# ╔═╡ 9f0859f6-7383-4938-919d-4edf1bed5e90
+shortest_path_graph_kernel(ba, ibu, exact_seq_matching=true)
+
 # ╔═╡ e08d4d33-30fa-4fea-807e-7c8ab244debc
 md"### exact matching on the atom-bond label sequence
 
@@ -462,6 +468,7 @@ md"## 🕐 timing"
 # ╟─f9461018-9522-4fe6-a53f-665b3839b6e4
 # ╠═50d85bc2-2e1a-424a-84f7-5a22c88759ed
 # ╟─f774c2df-1859-443e-9fee-9d490a18c83b
+# ╠═e978a83d-f0b3-4dd0-98e6-250124698ec4
 # ╠═ffa9d1c9-9534-46fd-aed2-ed549ac46384
 # ╠═1f17de1a-5375-4c22-97cd-7dc04645b9d1
 # ╟─7e5c01f5-a1fa-4bca-a7eb-c079a7237a8f
@@ -499,6 +506,7 @@ md"## 🕐 timing"
 # ╠═0a0b68fe-c0bb-433f-8cb8-e53465664bd0
 # ╟─6c0bbcce-0d91-4bd8-83e8-6e663eaf10a9
 # ╠═3abe5e9e-777e-44fd-bd3e-8611beacc6f4
+# ╠═9f0859f6-7383-4938-919d-4edf1bed5e90
 # ╟─e08d4d33-30fa-4fea-807e-7c8ab244debc
 # ╠═8d7e1fc5-0026-4e41-8ea5-8a3dc5877431
 # ╟─52da25a4-dd70-4531-aafd-d69ebcef95a7
