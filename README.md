@@ -1,4 +1,3 @@
 # ShortestPathMolecularGraphKernels.jl
 
-[![docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://SimonEnsemble.github.io/ShortestPathMolecularGraphKernels.jl/dev)
-
+[![docs](https://img.shields.io/badge/docs-stable-blue.svg)](https://SimonEnsemble.github.io/ShortestPathMolecularGraphKernels.jl/stable)
