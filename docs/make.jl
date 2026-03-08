@@ -2,7 +2,8 @@ using Documenter, ShortestPathMolecularGraphKernels
 
 makedocs(
     sitename="Shortest Path Molecular Graph Kernels",
-    repo="github.com/SimonEnsemble/ShortestPathMolecularGraphKernels.jl.git"
+    repo="github.com/SimonEnsemble/ShortestPathMolecularGraphKernels.jl.git",
+    format=Documenter.HTML(; assets=["assets/flux.css"])
 )
 
 deploydocs(
