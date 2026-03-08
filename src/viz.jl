@@ -46,7 +46,7 @@ function viz(
         end
     end
 	
-	fig = Figure()
+	fig = Figure(size=(325, 325))
 	ax = Axis(fig[1, 1], aspect=DataAspect())
 	hidedecorations!(ax)
 	hidespines!(ax)

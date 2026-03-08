@@ -28,6 +28,10 @@ begin
 	using PlutoUI # sorry no way around for runtests.jl as script
 	using Graphs, Printf, LinearAlgebra, GraphMakie, BenchmarkTools, Colors, Test
 
+	# if u want a cool theme
+	# using MakieThemes, CairoMakie
+	# set_theme!(ggthemr(:pale))
+
 	TableOfContents()
 end
 
@@ -463,6 +467,30 @@ md"## 🕐 timing"
 # ╔═╡ 2bfb6517-de01-4c4e-bf40-346e18f129c5
 @btime shortest_path_graph_kernel(ba, ibu, exact_seq_matching=true)
 
+# ╔═╡ 9cc543f5-2463-4a1f-906a-8da2b04c92f7
+md"## 🎓 for teaching
+
+show two molecular graphs and two paths common to them.
+"
+
+# ╔═╡ 0555d22b-33b1-46b6-937b-2dca682476d2
+viz(
+	caf, 
+	id_spath=findfirst(caf.spaths .== get_shortest_paths(caf, 2, 9)),
+	nlabels=false
+)
+
+# ╔═╡ eb8f8e60-4b9e-40af-849e-d5c7fbc274fe
+# adenine 
+adn = MolGraph("C1=NC2=NC=NC(=C2N1)N"); find_shortest_paths!(adn)
+
+# ╔═╡ 9df77e29-369d-481d-a2f4-b20ee0854c49
+viz(
+	adn, 
+	id_spath=findfirst(adn.spaths .== get_shortest_paths(adn, 6, 9)),
+	nlabels=false
+)
+
 # ╔═╡ Cell order:
 # ╠═cecf3058-bb8f-11f0-97f3-bda46249b7c9
 # ╟─f9461018-9522-4fe6-a53f-665b3839b6e4
@@ -521,3 +549,7 @@ md"## 🕐 timing"
 # ╟─27f09dc8-fe7b-4994-b0e5-29de901d5e8c
 # ╠═214f70c0-1a5d-4f6c-a907-8e86025fe19c
 # ╠═2bfb6517-de01-4c4e-bf40-346e18f129c5
+# ╟─9cc543f5-2463-4a1f-906a-8da2b04c92f7
+# ╠═0555d22b-33b1-46b6-937b-2dca682476d2
+# ╠═eb8f8e60-4b9e-40af-849e-d5c7fbc274fe
+# ╠═9df77e29-369d-481d-a2f4-b20ee0854c49
