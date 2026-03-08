@@ -5,6 +5,10 @@ a *molecular graph* represents a molecule as a simple graph (nodes: atoms; edges
 (a) nodes are "labeled" with the atomic species (H, C, N, etc.) of the atoms they represent and 
 (b) edges are "labeled" with the type (aromatic, single, double, triple) of bond they represent.
 
+```@raw html
+<img src="caffeine.png" width="30%"/>
+``` ⠀
+
 a *molecular graph kernel*, loosely, scores the similarity of two molecular graphs. 
 more formally, it corresponds with an inner product of two feature vectors of the molecular graphs.
 so, some mapping from a molecular graph to a vector representation, theoretically, underlies a molecular graph kernel.
@@ -18,6 +22,10 @@ given two input molecular graphs, the kernel counts pairs of corresponding short
 2. length and exact atom-bond label sequence.
 the exact sequence matching is much more expressive of molecular similarity,
  but it corresponds with a sparser underlying feature vector.
+
+```@raw html
+<img src="overview.png" width="75%"/>
+``` ⠀
 
 this Julia package, `ShortestPathMolecularGraphKernels.jl`:
 * employs `MolecularGraph.jl` to interpret a SMILES specification of a molecular structure as a molecular graph.
@@ -52,7 +60,9 @@ mg.spaths[id_spath]          # shows all info abt this shortest path
 viz(mg, id_spath=id_spath)   # visualize graph and highlight shortest path
 ```
 
-![molecular graph viz and shortest path explorer](caffeine_w_path_hl.png)
+```@raw html
+<img src="caffeine_w_path_hl.png" width="75%"/>
+``` ⠀
 
 finally, we can compute the shortest path graph kernel between a pair of molecular graphs using either scoring criteria:
 ```julia
