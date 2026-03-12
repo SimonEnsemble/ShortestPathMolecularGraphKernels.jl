@@ -96,6 +96,13 @@ find_shortest_paths!.(mgs)
 K = compute_Gram_matrix(mgs, false) # K[i, j] = K[j, i]: similarity btwn molecular graphs i & j
 ```
 
+## tests and more demos
+
+run `tests/runtests.jl` as a Pluto.jl notebook.
+these tests automatically run via Github actions after every commit and pull request.
+the tests involve explicitly constructing the feature vectors and taking the dot product,
+to ensure equality with the kernel.
+
 ## references
 Kriege NM, Johansson FD, Morris C. A survey on graph kernels. Applied Network Science. 2020.
 

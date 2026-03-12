@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.23
+# v0.20.24
 
 using Markdown
 using InteractiveUtils
@@ -338,7 +338,7 @@ begin
 	@test get_shortest_paths(ibu, 12, 9)[1].ρ == [12, 11, 8, 9]
 	@test get_shortest_paths(ibu, 5, 3)[1].ρ == reverse([5, 4, 2, 3])
 
-	viz(ibu, nlabels=true)
+	viz(ibu, nlabels=true, size=(500, 500))
 end
 
 # ╔═╡ 6c0bbcce-0d91-4bd8-83e8-6e663eaf10a9

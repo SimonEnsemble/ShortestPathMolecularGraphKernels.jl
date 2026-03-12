@@ -1,5 +1,8 @@
 """
-    viz(mg::MolGraph; id_spath::Union{Int, Nothing}=nothing, nlabels::Bool=true)
+    viz(
+        mg::MolGraph; id_spath::Union{Int, Nothing}=nothing,
+        nlabels::Bool=true, size::Tuple{Int, Int}=(375, 375)
+    )
 
 visualize a molecular graph and, if the index of a shortest path is provided,
 highlight that shortest path.
@@ -17,7 +20,8 @@ function viz(
 	nlabels::Bool=true,
     node_size::Int=25,
     id_spath::Union{Int, Nothing}=nothing,
-    edge_hl_color::Symbol=:green3
+    edge_hl_color::Symbol=:green3,
+    size::Tuple{Int, Int}=(375, 375)
 )
     # error out if shortest paths not computed yet
     if length(mg.spaths) == 0 && ! isnothing(id_spath)
@@ -46,7 +50,7 @@ function viz(
         end
     end
 	
-	fig = Figure(size=(325, 325))
+	fig = Figure(size=size)
 	ax = Axis(fig[1, 1], aspect=DataAspect())
 	hidedecorations!(ax)
 	hidespines!(ax)
@@ -63,6 +67,15 @@ function viz(
 		nlabels_distance=12.0,
         edge_color=edge_color
 	)
+    # increase padding
+    autolimits!(ax)
+    lims = ax.finallimits[]
+    ox, oy = lims.origin
+    wx, wy = lims.widths
+    pad = 0.3
+    limits!(ax, ox-pad, ox+wx+pad, oy-pad, oy+wy+pad)
+    println(lims)
+    #limits!(ax, minimum(lims) - 0.3, maximum(lims) + 0.3)
 	
 	fig
 end
