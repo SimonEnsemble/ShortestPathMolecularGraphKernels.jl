@@ -171,8 +171,7 @@ begin
 			"NCCC", 
 			"CN1C=NC2=C1C(=O)N(C)C(=O)N2C", 
 			"O=C(O)c1ccccc1",
-			"CC(C)CC1=CC=C(C=C1)C(C)C(=O)O",
-			"CN1C=NC2=C1C(=O)N(C)C(=O)N2C"
+			"CC(C)CC1=CC=C(C=C1)C(C)C(=O)O"
 		]
 	)
 	
@@ -451,12 +450,21 @@ md"## 🐧 multi-threaded Gram matrix computation"
 Threads.nthreads() # number of threads
 
 # ╔═╡ 70359912-dc86-4c73-ac53-85001f27b65a
-K = @btime compute_Gram_matrix(test_mgs, false)
+K = @btime compute_Gram_matrix(vcat(test_mgs, test_mgs[[3, 1]]), true) # put in duplicates on purpose for later
 
 # ╔═╡ f4c2a738-d82f-445c-890f-cec99fbd3573
 @test K[3, 4] ≈ shortest_path_graph_kernel(
-	test_mgs[3], test_mgs[4]
+	test_mgs[3], test_mgs[4], exact_seq_matching=true
 )
+
+# ╔═╡ 3488704a-55d6-40f3-a1b3-86f2feec3fbc
+begin
+	idps = indistinguishable_pairs(K)
+	@test length(idps) == 2
+	@test (1, 8) in idps
+	@test (3, 7) in idps
+	idps
+end
 
 # ╔═╡ 27f09dc8-fe7b-4994-b0e5-29de901d5e8c
 md"## 🕐 timing"
@@ -546,6 +554,7 @@ viz(
 # ╠═d2eb0777-0b84-4281-8363-2dbde45cbe0b
 # ╠═70359912-dc86-4c73-ac53-85001f27b65a
 # ╠═f4c2a738-d82f-445c-890f-cec99fbd3573
+# ╠═3488704a-55d6-40f3-a1b3-86f2feec3fbc
 # ╟─27f09dc8-fe7b-4994-b0e5-29de901d5e8c
 # ╠═214f70c0-1a5d-4f6c-a907-8e86025fe19c
 # ╠═2bfb6517-de01-4c4e-bf40-346e18f129c5

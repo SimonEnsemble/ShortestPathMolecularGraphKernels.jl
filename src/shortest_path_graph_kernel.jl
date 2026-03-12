@@ -62,7 +62,7 @@ function indistinguishable_pairs(K::Matrix{Float64})
 	# loop thru pairs
 	for i = 1:n
 		for j = i+1:n
-			if all(isapprox.(K[i, :], K[j, :]))
+			if isapprox(K[:, i], K[:, j])
 				push!(psps, (i, j))
 			end
 		end
