@@ -122,4 +122,6 @@ get_shortest_paths
 shortest_path_graph_kernel
 compute_Gram_matrix
 viz
+normalize_Gram_matrix
+center_Gram_matrix
 ```

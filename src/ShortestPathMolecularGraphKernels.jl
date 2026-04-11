@@ -6,7 +6,7 @@ module ShortestPathMolecularGraphKernels
 import Base: ==, hash
 using Base.Threads
 
-using Graphs, CairoMakie, GraphMakie, Printf, Colors
+using Graphs, CairoMakie, GraphMakie, Printf, Colors, Statistics, LinearAlgebra
 using PeriodicTable: elements
 using MolecularGraph: smilestomol, SMILESMolGraph, is_edge_aromatic, 
     coords2d, RASMOL_ATOM_COLOR, coordgen!, add_hydrogens!
@@ -45,5 +45,5 @@ export ShortestPath, get_shortest_paths,                          # shortest_pat
     OrdinarySPF, LabelSeqSPF, build_feature_vector, FeatureSpace, # featurization.jl
     active_features,
     shortest_path_graph_kernel, shortest_path_kernel, indistinguishable_pairs, # shorest_path_kernel.jl
-    compute_Gram_matrix # gram_matrix.jl
+    compute_Gram_matrix, center_Gram_matrix, normalize_Gram_matrix # gram_matrix.jl
 end

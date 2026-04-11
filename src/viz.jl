@@ -74,7 +74,6 @@ function viz(
     wx, wy = lims.widths
     pad = 0.3
     limits!(ax, ox-pad, ox+wx+pad, oy-pad, oy+wy+pad)
-    println(lims)
     #limits!(ax, minimum(lims) - 0.3, maximum(lims) + 0.3)
 	
 	fig
