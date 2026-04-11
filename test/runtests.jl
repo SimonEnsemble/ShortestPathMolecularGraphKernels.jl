@@ -467,13 +467,31 @@ begin
 end
 
 # ╔═╡ 27f09dc8-fe7b-4994-b0e5-29de901d5e8c
-md"## 🕐 timing"
+md"### 🕐 timing"
 
 # ╔═╡ 214f70c0-1a5d-4f6c-a907-8e86025fe19c
 @btime shortest_path_graph_kernel(ba, ibu)
 
 # ╔═╡ 2bfb6517-de01-4c4e-bf40-346e18f129c5
 @btime shortest_path_graph_kernel(ba, ibu, exact_seq_matching=true)
+
+# ╔═╡ aa200f41-69cf-4384-a54b-079c19b88c21
+md"### centering"
+
+# ╔═╡ 5f31115a-4e7d-4282-a6f4-62d08326772d
+begin
+	# make fake feature vectors
+	fake_Xs = rand(2, 10) # feature vectors in cols
+
+	# create centered feature vectors
+	fake_X̂s = fake_Xs .- mean(fake_Xs, dims=2)
+	
+	# make fake Gram matrix
+	fake_K = fake_Xs' * fake_Xs # not centered
+	fake_K̂ = fake_X̂s' * fake_X̂s # centered
+
+	@test center_Gram_matrix(fake_K) ≈ fake_K̂
+end
 
 # ╔═╡ 9cc543f5-2463-4a1f-906a-8da2b04c92f7
 md"## 🎓 for teaching
@@ -558,6 +576,8 @@ viz(
 # ╟─27f09dc8-fe7b-4994-b0e5-29de901d5e8c
 # ╠═214f70c0-1a5d-4f6c-a907-8e86025fe19c
 # ╠═2bfb6517-de01-4c4e-bf40-346e18f129c5
+# ╟─aa200f41-69cf-4384-a54b-079c19b88c21
+# ╠═5f31115a-4e7d-4282-a6f4-62d08326772d
 # ╟─9cc543f5-2463-4a1f-906a-8da2b04c92f7
 # ╠═0555d22b-33b1-46b6-937b-2dca682476d2
 # ╠═eb8f8e60-4b9e-40af-849e-d5c7fbc274fe

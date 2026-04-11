@@ -26,3 +26,30 @@ function compute_Gram_matrix(
 	end
 	return K
 end
+
+"""
+    center_Gram_matrix(K::Matrix{Float64}) -> Matrix{Float64}
+
+center a Gram (kernel) matrix using double centering.
+
+double centering of a Gram matrix removes the mean along each row and each column, 
+then adds back the grand mean to avoid over-subtraction. this is equivalent to 
+re-computing the original feature vectors, centering them, *then* taking the dot product 
+of those centered feature vectors. do this before e.g. k-PCA!
+
+# example
+```julia
+Xs = rand(2, 10) # 10 2D feature vectors
+K = Xs' * Xs
+K_centered = center_Gram_matrix(K)
+```
+"""
+function center_Gram_matrix(K::Matrix{Float64})
+    @assert size(K, 2) == size(K, 1) "Gram matrix must be square!"
+
+    row_mean = mean(K, dims=2)
+    col_mean = mean(K, dims=1)
+    total_mean = mean(K)
+
+    return K .- row_mean .- col_mean .+ total_mean
+end
