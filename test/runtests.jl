@@ -476,21 +476,36 @@ md"### 🕐 timing"
 @btime shortest_path_graph_kernel(ba, ibu, exact_seq_matching=true)
 
 # ╔═╡ aa200f41-69cf-4384-a54b-079c19b88c21
-md"### centering"
+md"### centering and normalization"
 
 # ╔═╡ 5f31115a-4e7d-4282-a6f4-62d08326772d
 begin
-	# make fake feature vectors
-	fake_Xs = rand(2, 10) # feature vectors in cols
+	# make fake feature vectors. 10 2D feature vectors
+	fXs = rand(2, 10) # feature vectors in cols
 
 	# create centered feature vectors
-	fake_X̂s = fake_Xs .- mean(fake_Xs, dims=2)
+	fX̂s = fXs .- mean(fXs, dims=2)
 	
 	# make fake Gram matrix
-	fake_K = fake_Xs' * fake_Xs # not centered
-	fake_K̂ = fake_X̂s' * fake_X̂s # centered
+	fK = fXs' * fXs # not centered
+	fK̂ = fX̂s' * fX̂s # centered
 
-	@test center_Gram_matrix(fake_K) ≈ fake_K̂
+	# the centered Gram matrix should match the Gram matrix
+	#  computed from scratch, from the centered feature vectors
+	@test center_Gram_matrix(fK) ≈ fK̂
+
+	# cosine similarity
+	cos_sim = [
+		dot(fXs[:, i], fXs[:, j]) / (
+			norm(fXs[:, i]) * norm(fXs[:, j])
+		) for i = 1:10, j = 1:10
+	]
+
+	# cosine similarity matches normalized kernel matrix
+	@test normalize_Gram_matrix(fK) ≈ cos_sim
+
+	# remains semi-positive definite
+	@test all(x -> x >= -1e-10, eigen(cos_sim).values)
 end
 
 # ╔═╡ 9cc543f5-2463-4a1f-906a-8da2b04c92f7

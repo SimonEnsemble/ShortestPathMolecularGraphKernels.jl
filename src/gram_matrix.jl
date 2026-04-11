@@ -53,3 +53,17 @@ function center_Gram_matrix(K::Matrix{Float64})
 
     return K .- row_mean .- col_mean .+ total_mean
 end
+
+"""
+    normalize_Gram_matrix(K::Matrix{Float64}) -> Matrix{Float64}
+
+normalize a Gram (kernel) matrix so that all diagonal entries equal 1.
+
+each entry `K[i,j]` is divided by `sqrt(K[i,i]) * sqrt(K[j,j])`, which is
+equivalent to converting kernel values into cosine similarities between the
+underlying feature vectors.
+"""
+function normalize_Gram_matrix(K::Matrix{Float64})
+    d = sqrt.(diag(K)) # square root of diagonal
+    return K ./ (d * d')  
+end
