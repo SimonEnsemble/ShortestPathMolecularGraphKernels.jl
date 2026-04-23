@@ -38,13 +38,20 @@ end
 """
     get_shortest_paths(spaths::Vector{ShortestPath}, u::Int, v::Int) -> Vector{ShortestPath}
     get_shortest_paths(mg::MolGraph, u::Int, v::Int) -> Vector{ShortestPath}
+    get_shortest_paths(mg::MolGraph, u::Int) -> Vector{ShortestPath}
 
-filter the list of shortest paths.
+filter the list of shortest paths to get those "u ↔ v" or "u ↔ *"
 """
 function get_shortest_paths(spaths::Vector{ShortestPath}, u::Int, v::Int)
     return filter(spaths) do spath
         ρ_first = spath.ρ[1]
         ρ_last  = spath.ρ[end]
         return (u == ρ_first && v == ρ_last) || (v == ρ_first && u == ρ_last)
+    end
+end
+
+function get_shortest_paths(spaths::Vector{ShortestPath}, u::Int)
+    return filter(spaths) do spath
+        return u == spath.ρ[1] || u == spath.ρ[end]
     end
 end

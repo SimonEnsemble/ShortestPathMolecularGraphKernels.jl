@@ -532,6 +532,32 @@ viz(
 	nlabels=false
 )
 
+# ╔═╡ 3fb5f269-ba3e-496b-abd9-158b59db77da
+md"## 🐧 handling non-connected graphs"
+
+# ╔═╡ 329a17cf-e24a-4223-b5a2-d1db4c72bbab
+begin
+	mg_nc₁ = MolGraph("CC(C(=O)OCC)S(=O)(=O)[O-].[Na+]")
+	find_shortest_paths!(mg_nc₁)
+	viz(mg_nc₁)
+end
+
+# ╔═╡ b0284ce6-d3f5-4bc9-bb05-a9417b51410f
+@test length(get_shortest_paths(mg_nc₁, 12)) == 1
+
+# ╔═╡ 2ee527b4-02c7-40ab-8921-d3b514fd7849
+begin
+	mg_nc₂ = MolGraph("CC(C(=O)OCC)S(=O)(=O)[O]")
+	find_shortest_paths!(mg_nc₂)
+	viz(mg_nc₂)
+end
+
+# ╔═╡ e8d82eab-c449-4a48-93f1-1a505a2f1874
+@test shortest_path_graph_kernel(mg_nc₁, mg_nc₂) ≈ shortest_path_graph_kernel(mg_nc₂, mg_nc₂)
+
+# ╔═╡ f2205da5-9e55-42a6-98d5-156f03d932e2
+@test shortest_path_graph_kernel(mg_nc₁, mg_nc₁) ≈ shortest_path_graph_kernel(mg_nc₂, mg_nc₂) + 1
+
 # ╔═╡ Cell order:
 # ╠═cecf3058-bb8f-11f0-97f3-bda46249b7c9
 # ╟─f9461018-9522-4fe6-a53f-665b3839b6e4
@@ -597,3 +623,9 @@ viz(
 # ╠═0555d22b-33b1-46b6-937b-2dca682476d2
 # ╠═eb8f8e60-4b9e-40af-849e-d5c7fbc274fe
 # ╠═9df77e29-369d-481d-a2f4-b20ee0854c49
+# ╟─3fb5f269-ba3e-496b-abd9-158b59db77da
+# ╠═329a17cf-e24a-4223-b5a2-d1db4c72bbab
+# ╠═b0284ce6-d3f5-4bc9-bb05-a9417b51410f
+# ╠═2ee527b4-02c7-40ab-8921-d3b514fd7849
+# ╠═e8d82eab-c449-4a48-93f1-1a505a2f1874
+# ╠═f2205da5-9e55-42a6-98d5-156f03d932e2

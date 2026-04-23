@@ -43,9 +43,6 @@ function MolGraph(smiles::String; incl_hydrogen::Bool=false, verbose::Bool=false
 
     # construct simple graph
     g = deepcopy(mol.graph)
-    if ! is_connected(g)
-        @warn "molecular graph for $smiles is not connected!"
-    end
     
     # node labels: atom type
     atoms = [AtomType(elements[mol.vprops[v].symbol].number) for v = 1:nv(g)]
@@ -65,3 +62,4 @@ function MolGraph(smiles::String; incl_hydrogen::Bool=false, verbose::Bool=false
 end
 
 get_shortest_paths(mg::MolGraph, u::Int, v::Int) = get_shortest_paths(mg.spaths, u, v)
+get_shortest_paths(mg::MolGraph, u::Int) = get_shortest_paths(mg.spaths, u)

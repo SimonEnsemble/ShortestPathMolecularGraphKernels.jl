@@ -7,6 +7,16 @@ function get_edge_id(g::SimpleGraph, u::Int, v::Int)
     error("no such edge ($u, $v) in the graph!")
 end
 
+function nb_spaths(mg::MolGraph)
+	p = 0 # number of shortest paths
+	for cc in connected_components(mg.g)
+		# paths between nodes in this connected component
+		n = length(cc)
+		p += n * (n - 1) ÷ 2 
+	end
+	return p + nv(mg.g) # self-loops
+end
+
 """
     find_shortest_paths!(mg::MolGraph; ℓ_max::Int=typemax(Int)) -> nothing
 
@@ -24,10 +34,6 @@ caf.spaths # now contains the list of shortest paths
 ```
 """
 function find_shortest_paths!(mg::MolGraph; ℓ_max::Int=typemax(Int))
-    if ! is_connected(mg.g)
-        error("$(mg.smiles) not a connected graph =/")
-    end
-
 	# loop over (src, dst) pairs
 	for src = 1:nv(mg.g)
 		# find all (src, ..., dst) paths for ∀ dst
@@ -106,7 +112,7 @@ function find_shortest_paths!(mg::MolGraph; ℓ_max::Int=typemax(Int))
 		end
 	end
 
-    @assert sum(sp.w for sp in mg.spaths) ≈ nv(mg.g) * (nv(mg.g) - 1) / 2 + nv(mg.g)
+    @assert sum(sp.w for sp in mg.spaths) ≈ nb_spaths(mg) * 1.0
 
     return nothing
 end
