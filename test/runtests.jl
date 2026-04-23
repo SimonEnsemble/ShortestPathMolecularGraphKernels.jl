@@ -384,6 +384,18 @@ end
 # ╔═╡ 9f0859f6-7383-4938-919d-4edf1bed5e90
 shortest_path_graph_kernel(ba, ibu, exact_seq_matching=true)
 
+# ╔═╡ 1e6fc4f0-a1fe-43e0-8f0b-97f112fdf1c5
+md"single ion"
+
+# ╔═╡ 0561aa20-28ef-416a-871e-82b0703efff0
+begin
+	ion = MolGraph("[Na+]")
+	find_shortest_paths!(ion)
+	@test length(ion.spaths) == 1
+
+	@test shortest_path_graph_kernel(ion, ion) == 1
+end
+
 # ╔═╡ e08d4d33-30fa-4fea-807e-7c8ab244debc
 md"### exact matching on the atom-bond label sequence
 
@@ -553,9 +565,11 @@ begin
 end
 
 # ╔═╡ e8d82eab-c449-4a48-93f1-1a505a2f1874
+# everything same between 1 and 2 except for Na
 @test shortest_path_graph_kernel(mg_nc₁, mg_nc₂) ≈ shortest_path_graph_kernel(mg_nc₂, mg_nc₂)
 
 # ╔═╡ f2205da5-9e55-42a6-98d5-156f03d932e2
+# Na-Na score for 2-2 similarity
 @test shortest_path_graph_kernel(mg_nc₁, mg_nc₁) ≈ shortest_path_graph_kernel(mg_nc₂, mg_nc₂) + 1
 
 # ╔═╡ Cell order:
@@ -602,6 +616,8 @@ end
 # ╟─6c0bbcce-0d91-4bd8-83e8-6e663eaf10a9
 # ╠═3abe5e9e-777e-44fd-bd3e-8611beacc6f4
 # ╠═9f0859f6-7383-4938-919d-4edf1bed5e90
+# ╟─1e6fc4f0-a1fe-43e0-8f0b-97f112fdf1c5
+# ╠═0561aa20-28ef-416a-871e-82b0703efff0
 # ╟─e08d4d33-30fa-4fea-807e-7c8ab244debc
 # ╠═8d7e1fc5-0026-4e41-8ea5-8a3dc5877431
 # ╟─52da25a4-dd70-4531-aafd-d69ebcef95a7
