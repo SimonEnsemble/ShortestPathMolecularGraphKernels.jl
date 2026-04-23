@@ -455,6 +455,30 @@ begin
 	) == 3.0 # 2 x C, 1 x O, 0 x CO cuz triple vs single blod
 end
 
+# ╔═╡ 56f05958-1237-4bcf-a2e4-0092f75bd443
+md"### exact vs non-exact matching"
+
+# ╔═╡ d8c7de3d-5452-489c-8228-78ff131ac840
+begin
+	cnc = MolGraph("CNC")
+	find_shortest_paths!(cnc)
+
+	ccc = MolGraph("CCC")
+	find_shortest_paths!(ccc)
+
+	# ℓ = 0: 
+	#    cnc: C, N, C 
+	#    ccc: C, C, C
+	# ℓ = 1
+	#    cnc: CN, NC
+	#    ccc: CC, CC
+	# ℓ = 2
+	#    cnc: CNC
+	#    ccc: CCC
+	@test shortest_path_graph_kernel(cnc, ccc, exact_seq_matching=false) == 6 + 0 + 1
+	@test shortest_path_graph_kernel(cnc, ccc, exact_seq_matching=true) == 6 + 0 + 0
+end
+
 # ╔═╡ 54921516-63b0-472a-b1d3-005a73762a90
 md"## 🐧 multi-threaded Gram matrix computation"
 
@@ -625,6 +649,8 @@ end
 # ╠═7d5b9446-9adc-489c-961c-a6b6ea3240ee
 # ╠═303a7141-a442-4162-b67c-f7d12c3f4ca1
 # ╠═cbd9304a-d88e-42a6-8cc9-ad5ef6198f36
+# ╟─56f05958-1237-4bcf-a2e4-0092f75bd443
+# ╠═d8c7de3d-5452-489c-8228-78ff131ac840
 # ╟─54921516-63b0-472a-b1d3-005a73762a90
 # ╠═d2eb0777-0b84-4281-8363-2dbde45cbe0b
 # ╠═70359912-dc86-4c73-ac53-85001f27b65a
