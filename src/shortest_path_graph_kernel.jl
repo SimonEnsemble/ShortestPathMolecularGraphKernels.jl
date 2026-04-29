@@ -55,17 +55,3 @@ function shortest_path_graph_kernel(
 	
 	return k
 end
-
-function indistinguishable_pairs(K::Matrix{Float64})
-	n = size(K)[1] # number of molecules
-	psps = Vector{Tuple{Int, Int}}() # list of perfectly similar pairs
-	# loop thru pairs
-	for i = 1:n
-		for j = i+1:n
-			if isapprox(K[:, i], K[:, j])
-				push!(psps, (i, j))
-			end
-		end
-	end
-	return psps
-end
