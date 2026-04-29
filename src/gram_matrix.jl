@@ -67,3 +67,25 @@ function normalize_Gram_matrix(K::Matrix{Float64})
     d = sqrt.(diag(K)) # square root of diagonal
     return K ./ (d * d')  
 end
+
+"""
+    indistinguishable_pairs(K::Matrix{Float64}) -> Vector{Tuple{Int, Int}}
+
+returns pairs of molecules that are indistinguishable based on a kernel matrix.
+
+two molecules `i` and `j` are considered indistinguishable if their corresponding columns
+in `K` are approximately equal (via `isapprox`).
+"""
+function indistinguishable_pairs(K::Matrix{Float64})
+	n = size(K)[1] # number of molecules
+	psps = Vector{Tuple{Int, Int}}() # list of perfectly similar pairs
+	# loop thru pairs
+	for i = 1:n
+		for j = i+1:n
+			if isapprox(K[:, i], K[:, j])
+				push!(psps, (i, j))
+			end
+		end
+	end
+	return psps
+end
